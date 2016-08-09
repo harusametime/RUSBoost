@@ -88,7 +88,7 @@ class RUSBoost:
         diff = self.Y.count(1) > self.Y.count(0)
         delete_list = []
         keep_list =[]
-        if  diff > 0:
+        if  diff:
             for i in range(len(self.Y)):
                 if self.Y[i] == 1:
                     delete_data = [i, self.X[i], 1]
@@ -103,9 +103,9 @@ class RUSBoost:
                     delete_list.append(delete_data)
                 else:
                     keep_data = [i, self.X[i], 1]
-                    keep_list.append(keep_data)
+                    keep_list.append(keep_data)  
         
-        while len(keep_list) != self.rate*(len(delete_list)+len(keep_list)):
+        while len(delete_list) > self.rate*(len(delete_list)+len(keep_list)):
             k = random.choice(range(len(delete_list)))
             delete_list.pop(k)
         
@@ -126,11 +126,11 @@ if __name__ == '__main__':
     N = 20
     
     '''
-    Set the rate of minor instances to major instances
+    Set the rate of minor instances to the total instances
     If the rate is 0.5, the numbers of both instances become equal
     by random under sampling. 
     ''' 
-    rate = 0.5
+    rate = 0.05
     
     
     '''
