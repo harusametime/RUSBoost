@@ -13,3 +13,6 @@ I welcome your feedback to improve this code.
 IEEE Transactions on Systems, Man and Cybernetics, Part A: Systems and Humans,
 vol.40, no.1, pp.185,197, Jan. 2010
 
+Note
+=======
+This code can run with Python 2.6. For Python 3.6, this code needs some revisions.
