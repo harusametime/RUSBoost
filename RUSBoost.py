@@ -5,9 +5,7 @@ import random
 
 class RUSBoost:
 
-
     def __init__(self, instances, labels, base_classifier, n_classifier, balance):
-        
         self.w_update=[]
         self.clf = []
         self.n_classifier = n_classifier
@@ -16,18 +14,18 @@ class RUSBoost:
         self.rate = balance
         self.X = instances
         self.Y = labels
-        
+
         # initialize weight
         self.weight = []
         self.init_w = 1.0/len(self.X)
         for i in range(len(self.X)):
             self.weight.append(self.init_w)
-    
+
     def classify(self, instance):
-        
+
         positive_score = 0 # in case of +1
         negative_score = 0 # in case of 0
-        
+
         for k in range(self.n_classifier):
             if self.clf[k].predict(instance) == 1:
                 positive_score += log(1/self.w_update[k])
@@ -37,53 +35,42 @@ class RUSBoost:
             return 1
         else:
             return 0
-        
-            
-        
+
+
+
     def learning(self):
-        
-        k = 0
-        while k < self.n_classifier:
-            
+        for k in range(self.n_classifier):
+
             sampled = self.undersampling()
-            sampled_X = []
-            sampled_Y = []
-            sampled_weight = []
-            
-            for s in sampled:
-                sampled_X.append(s[1])
-                sampled_Y.append(s[2])
-                sampled_weight.append(self.weight[s[0]])
-                
+
+            sampled_weight = [s[0] for s in sampled]
+            sampled_X      = [s[1] for s in sampled]
+            sample_Y       = [s[2] for s in sampled]
+
             self.clf[k].fit(sampled_X, sampled_Y, sampled_weight)
-           
-   
-            loss = 0
-            for i in range(len(self.X)):
-                if self.Y[i] == self.clf[k].predict(self.X[i]):
-                    continue
-                else:
-                    loss += self.weight[i]
-    
+               # fit this classifier to the sampled samples
+
+            loss = sum(w for x,y,w in zip(self.X, self.Y, self.weight)\
+                         if y != self.clf[k].predict(x))
+                   # calculate loss equal to:
+                   # weight sum of classifications:
+                   # -> correct classifications are 0
+                   # -> misclassifications are 1
+
             self.w_update.append(loss/(1-loss))
-        
-            for i in range(len(self.weight)):
-                if loss == 0:
-                    self.weight[i] = self.weight[i]
-                elif self.Y[i] == self.clf[k].predict(self.X[i]):
-                    self.weight[i] = self.weight[i] * (loss / (1 - loss))
-                       
-            sum_weight = 0
-            for i in range(len(self.weight)):
-                sum_weight += self.weight[i]
-              
-            for i in range(len(self.weight)):
-                self.weight[i] = self.weight[i] / sum_weight
-            k = k + 1
-     
-            
+                  # calculated w_update parameter for next k
+
+            if loss > 0: # update weights if there is a loss
+               for i in range(len(self.weight)):
+                   if self.Y[i] == self.clf[k].predict(self.X[i]):
+                       self.weight[i] = self.weight[i] * (loss / (1 - loss))
+
+            sum_weight = sum(self.weight) # calculate total sum for normalization
+            self.weight = [w / sum_weight for w in self.weight]
+               # use total sum to normalize sum of weights to 1.0
+
     def undersampling(self):
-        
+
         '''Check the major class'''
         diff = self.Y.count(1) > self.Y.count(0)
         delete_list = []
