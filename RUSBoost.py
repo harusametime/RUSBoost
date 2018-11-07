@@ -43,7 +43,7 @@ class RUSBoost:
 
             sampled = self.undersampling()
 
-            sampled_weight = [s[0] for s in sampled]
+            sampled_weight = [self.weight[s[0]] for s in sampled]
             sampled_X      = [s[1] for s in sampled]
             sample_Y       = [s[2] for s in sampled]
 
